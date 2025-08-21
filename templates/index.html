@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>TestArc AI - Context-Aware Test Case Generator🚀</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #059669;
+            --danger-color: #dc2626;
+            --warning-color: #d97706;
+            --dark-color: #1e293b;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #3b82f6 100%);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--dark-color) 0%, #334155 100%);
+            color: white;
+            border-radius: 16px 16px 0 0 !important;
+            border: none;
+            padding: 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-header i {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+            color: #60a5fa;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #3b82f6 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+            background: white;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-text {
+            color: var(--secondary-color);
+            font-size: 0.875rem;
+        }
+
+        .alert {
+            border-radius: 12px;
+            border: none;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #dcfdf7 0%, #a7f3d0 100%);
+            color: var(--success-color);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+            color: var(--danger-color);
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .alert-dismissible .btn-close {
+            padding: 1rem 1.5rem;
+        }
+
+        .testcase-output {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary-color);
+            white-space: pre-wrap;
+            font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+            line-height: 1.6;
+            max-height: 600px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: var(--primary-color);
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            font-size: 0.875rem;
+            border-radius: 8px;
+        }
+
+        .testcase-container {
+            position: relative;
+        }
+
+        .form-range {
+            margin: 0.5rem 0;
+        }
+
+        .form-range::-webkit-slider-thumb {
+            background: var(--primary-color);
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .form-range::-moz-range-thumb {
+            background: var(--primary-color);
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .navbar-brand i {
+            color: #60a5fa;
+        }
+
+        .user-story-display {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 1rem;
+            border-left: 4px solid var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                margin-bottom: 1.5rem;
+            }
+
+            .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+
+            .col-md-4 .btn {
+                width: auto;
+            }
+
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Loading animation */
+        .btn-loading {
+            position: relative;
+            color: transparent !important;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* File input styling */
+        .form-control[type="file"] {
+            padding: 8px 12px;
+        }
+
+        .form-control[type="file"]::-webkit-file-upload-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin-right: 12px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .form-control[type="file"]::-webkit-file-upload-button:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-dark" style="text-align: center; margin-bottom: 30px;">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1" >
+			<img src="/static/logo.png" alt="Company Logo" style="height: 60px;width: auto; margin-bottom: 10px;">
+                <i class="fas fa-robot me-2"></i>
+                TestArc AI - Context-Aware Test Case Generator🚀
+            </span>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Alert Messages -->
+        {% if message %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>Success!</strong> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Error!</strong> {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <!-- Knowledge Base Upload -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="fas fa-book"></i>
+                        Upload Knowledge Base (KB)
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Upload domain-specific documents to create your knowledge base. These will be used as context for all projects in this domain.
+                        </p>
+                        <form action="/upload-kb" method="post" enctype="multipart/form-data" id="kb-form">
+                            <div class="mb-3">
+                                <label for="kb-domain" class="form-label">Domain Name</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="kb-domain" 
+                                       name="domain" 
+                                       placeholder="e.g., Salesforce CPQ"
+                                       required>
+                                <div class="form-text">Enter a descriptive name for your domain knowledge base</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="kb-files" class="form-label">Select Files</label>
+                                <input type="file" 
+                                       class="form-control" 
+                                       id="kb-files" 
+                                       name="files" 
+                                       multiple 
+                                       accept=".pdf,.docx"
+                                       required>
+                                <div class="form-text">Upload PDF or DOCX files containing domain knowledge</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100" id="kb-submit">
+                                <i class="fas fa-upload me-2"></i>
+                                Upload to KB
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Documents Upload -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="fas fa-folder"></i>
+                        Upload Project Documents
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Upload project-specific documents. You must create a knowledge base domain first.
+                        </p>
+                        <form action="/upload-project" method="post" enctype="multipart/form-data" id="project-form">
+                            <div class="mb-3">
+                                <label for="project-domain" class="form-label">Select Domain</label>
+                                <select class="form-select" id="project-domain" name="domain" required>
+                                    <option value="">— Choose KB Domain —</option>
+                                    {% for domain in domains %}
+                                    <option value="{{ domain }}">{{ domain }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Choose from existing knowledge base domains</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="project-name" class="form-label">Project Name</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="project-name" 
+                                       name="project" 
+                                       placeholder="e.g., Quote Generation System"
+                                       required>
+                                <div class="form-text">Enter a descriptive name for your project</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="project-files" class="form-label">Select Files</label>
+                                <input type="file" 
+                                       class="form-control" 
+                                       id="project-files" 
+                                       name="files" 
+                                       multiple 
+                                       accept=".pdf,.docx"
+                                       required>
+                                <div class="form-text">Upload PDF or DOCX project documents</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100" id="project-submit">
+                                <i class="fas fa-upload me-2"></i>
+                                Upload to Project
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Case Generation -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-flask"></i>
+                        Generate Test Cases
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Generate comprehensive test cases based on your user story, domain knowledge, and project context.
+                        </p>
+                        <form action="/generate" method="post" id="generate-form">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="generate-domain" class="form-label">Select Domain</label>
+                                    <select class="form-select" id="generate-domain" name="domain" required>
+                                        <option value="">— Choose Domain —</option>
+                                        {% for domain in domains %}
+                                        <option value="{{ domain }}">{{ domain }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="generate-project" class="form-label">Select Project</label>
+                                    <select class="form-select" id="generate-project" name="project" required>
+                                        <option value="">— Choose Project —</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="temperature" class="form-label">Creativity Level</label>
+                                    <input type="range" 
+                                           class="form-range" 
+                                           id="temperature" 
+                                           name="temperature" 
+                                           min="0.1" 
+                                           max="1.0" 
+                                           step="0.1" 
+                                           value="0.7">
+                                    <div class="form-text text-center">
+                                        <small>Current: <span id="temp-value" class="fw-bold">0.7</span></small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="user-story" class="form-label">Enter User Story</label>
+                                <textarea class="form-control" 
+                                          id="user-story" 
+                                          name="user_story" 
+                                          rows="4" 
+                                          placeholder="As a user, I want to..."
+                                          required></textarea>
+                                <div class="form-text">Describe the functionality you want to test</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg" id="generate-submit">
+                                <i class="fas fa-magic me-2"></i>
+                                Generate Test Cases
+                            </button>
+                        </form>
+
+                        <!-- Loading Spinner -->
+                        <div class="loading-spinner" id="loading">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3 mb-0">Generating comprehensive test cases...</p>
+                            <small class="text-muted">This may take up to 30 seconds</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Case Results -->
+        {% if story or testcases %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-clipboard-check"></i>
+                        Generated Test Cases
+                    </div>
+                    <div class="card-body">
+                        {% if story %}
+                        <div class="mb-4">
+                            <h6 class="fw-bold">
+                                <i class="fas fa-user-story me-2 text-primary"></i>
+                                User Story:
+                            </h6>
+                            <div class="user-story-display">{{ story }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if testcases %}
+                        <div class="testcase-container">
+                            <button type="button" 
+                                    class="btn btn-outline-primary btn-sm copy-btn" 
+                                    onclick="copyTestCases()"
+                                    title="Copy test cases to clipboard">
+                                <i class="fas fa-copy me-1"></i>Copy
+                            </button>
+                            <div class="testcase-output" id="testcase-content">{{ testcases }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Domain-Project mapping from backend
+        const domainProjectMap = {{ domain_project_map | tojson | safe }};
+
+        // Temperature slider update
+        document.getElementById('temperature').addEventListener('input', function(e) {
+            document.getElementById('temp-value').textContent = e.target.value;
+        });
+
+        // Update projects when domain changes in generate form
+        document.getElementById('generate-domain').addEventListener('change', function(e) {
+            const domain = e.target.value;
+            const projectSelect = document.getElementById('generate-project');
+
+            // Clear existing options
+            projectSelect.innerHTML = '<option value="">— Choose Project —</option>';
+
+            if (domain && domainProjectMap[domain]) {
+                domainProjectMap[domain].forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project;
+                    option.textContent = project;
+                    projectSelect.appendChild(option);
+                });
+            }
+        });
+
+        // Form submission handling with loading states
+        function setButtonLoading(button, loading) {
+            if (loading) {
+                button.disabled = true;
+                button.classList.add('btn-loading');
+            } else {
+                button.disabled = false;
+                button.classList.remove('btn-loading');
+            }
+        }
+
+        // KB Form submission
+        document.getElementById('kb-form').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('kb-submit');
+            setButtonLoading(submitBtn, true);
+
+            // Fallback timeout
+            setTimeout(() => setButtonLoading(submitBtn, false), 30000);
+        });
+
+        // Project Form submission
+        document.getElementById('project-form').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('project-submit');
+            setButtonLoading(submitBtn, true);
+
+            // Fallback timeout
+            setTimeout(() => setButtonLoading(submitBtn, false), 30000);
+        });
+
+        // Generate Form submission
+        document.getElementById('generate-form').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('generate-submit');
+            const loadingDiv = document.getElementById('loading');
+
+            setButtonLoading(submitBtn, true);
+            loadingDiv.style.display = 'block';
+
+            // Scroll to loading indicator
+            loadingDiv.scrollIntoView({ behavior: 'smooth' });
+
+            // Fallback timeout
+            setTimeout(() => {
+                setButtonLoading(submitBtn, false);
+                loadingDiv.style.display = 'none';
+            }, 60000);
+        });
+
+        // Copy test cases functionality
+        function copyTestCases() {
+            const content = document.getElementById('testcase-content').textContent;
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(content).then(function() {
+                    showCopySuccess();
+                }).catch(function(err) {
+                    console.error('Failed to copy text: ', err);
+                    fallbackCopy(content);
+                });
+            } else {
+                fallbackCopy(content);
+            }
+        }
+
+        function showCopySuccess() {
+            const copyBtn = document.querySelector('.copy-btn');
+            const originalHTML = copyBtn.innerHTML;
+
+            copyBtn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+            copyBtn.classList.remove('btn-outline-primary');
+            copyBtn.classList.add('btn-success');
+
+            setTimeout(() => {
+                copyBtn.innerHTML = originalHTML;
+                copyBtn.classList.remove('btn-success');
+                copyBtn.classList.add('btn-outline-primary');
+            }, 2000);
+        }
+
+        function fallbackCopy(text) {
+            // Create a temporary textarea
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                showCopySuccess();
+            } catch (err) {
+                console.error('Fallback copy failed: ', err);
+                alert('Failed to copy to clipboard. Please select and copy manually.');
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                if (bsAlert) {
+                    bsAlert.close();
+                }
+            });
+        }, 5000);
+
+        // File validation
+        function validateFiles(input) {
+            const files = input.files;
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            const allowedTypes = [
+                'application/pdf', 
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            ];
+
+            for (let file of files) {
+                if (file.size > maxSize) {
+                    alert(`File "${file.name}" is too large. Maximum size is 10MB.`);
+                    input.value = '';
+                    return false;
+                }
+
+                if (!allowedTypes.includes(file.type)) {
+                    alert(`File "${file.name}" is not supported. Please upload PDF or DOCX files only.`);
+                    input.value = '';
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Add file validation to file inputs
+        document.getElementById('kb-files').addEventListener('change', function(e) {
+            validateFiles(e.target);
+        });
+
+        document.getElementById('project-files').addEventListener('change', function(e) {
+            validateFiles(e.target);
+        });
+
+        // Form validation feedback
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                const forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+
+        // Initialize tooltips if Bootstrap tooltips are present
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                tooltipTriggerList.map(function(tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            }
+        });
+
+        // Prevent multiple form submissions
+        let isSubmitting = false;
+
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if (isSubmitting) {
+                    e.preventDefault();
+                    return false;
+                }
+                isSubmitting = true;
+
+                // Reset after 5 seconds
+                setTimeout(() => {
+                    isSubmitting = false;
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>
