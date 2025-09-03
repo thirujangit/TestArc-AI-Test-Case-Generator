@@ -279,8 +279,8 @@ Your task is to generate **high-level functional tests** as well as **low-level,
 ---
 
 Please generate:
-- 30 Functional Test Cases
-- 10 Low-Level Numeric/Data Validation Test Cases
+- 15 Functional Test Cases
+- 5 Low-Level Numeric/Data Validation Test Cases
 - 2 Negative Test Cases
 - 2 Edge Cases
 """
