@@ -14,7 +14,9 @@ from docx import Document
 import faiss
 from sentence_transformers import SentenceTransformer
 import logging
-import openai
+#import openai
+import anthropic
+#from anthropic import Anthropic
 
 try:
     from tiktoken import get_encoding
@@ -284,7 +286,42 @@ Please generate:
 - 2 Negative Test Cases
 - 2 Edge Cases
 """
+import os
+import anthropic
 
+
+def call_claude(prompt: str, temperature: float = 0.7) -> str:
+    """Call Claude API with error handling"""
+
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+
+    if not api_key:
+        return "Error: ANTHROPIC_API_KEY not found."
+
+    try:
+        client = anthropic.Anthropic(
+            api_key=api_key
+        )
+
+        response = client.messages.create(
+            model="claude-sonnet-4-6",   # Replace with the exact model available to your account
+            max_tokens=4000,
+            temperature=temperature,
+            system="You are a QA expert specializing in comprehensive test case generation.",
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        return response.content[0].text
+
+    except Exception as e:
+        return f"Claude API Error: {str(e)}"
+        
+        
 def call_openai(prompt: str, temperature: float = 0.7) -> str:
     """Call Open AI API with error handling"""
     api_key = os.getenv("OPENAI_API_KEY")
@@ -320,6 +357,15 @@ def call_openai(prompt: str, temperature: float = 0.7) -> str:
         return f"Error: API request failed - {str(e)}"
     except Exception as e:
         return f"Error: {str(e)}"
+        
+def call_llm(prompt, temperature):
+    provider = os.getenv("LLM_PROVIDER", "anthropic")
+
+    if provider == "anthropic":
+        return call_claude(prompt, temperature)
+    else:
+        return call_openai(prompt, temperature)     
+        
 
 # --------- Routes --------- #
 
@@ -574,7 +620,10 @@ async def generate_test_cases(
 
         # Generate test cases
         prompt = build_prompt(user_story, all_context)
-        result = call_openai(prompt, temperature)
+        result = call_llm(prompt, temperature)
+       # result = call_claude(prompt, temperature)
+       # commented below line to work on claude
+       # result = call_openai(prompt, temperature)
 
         domains, domain_project_map = get_domains_and_projects()
         return templates.TemplateResponse(
