@@ -382,8 +382,8 @@ async def home(request: Request):
                 "domain_project_map": domain_project_map
             }
         )
-    except Exception as e:
-        logger.error(f"Error in home route: {e}")
+    except Exception:
+        logger.error(f"Error in home route")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.post("/upload-kb")
