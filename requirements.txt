@@ -8,7 +8,6 @@ pydantic
 PyPDF2
 python-docx
 faiss-cpu
-sentence-transformers>=2.2.2
 tiktoken
 openai
 anthropic
