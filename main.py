@@ -31,7 +31,8 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 # Initialize embedding model
-EMBEDDING_MODEL = SentenceTransformer("all-mpnet-base-v2")
+# EMBEDDING_MODEL = SentenceTransformer("all-mpnet-base-v2")
+EMBEDDING_MODE.encode("text-embedding-3-small")
 
 # Directories
 DATA_DIR = "data"
